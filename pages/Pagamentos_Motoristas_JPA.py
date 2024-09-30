@@ -93,6 +93,22 @@ def puxar_regiao():
 
     st.session_state.df_regiao = pd.DataFrame(sheet_data[1:], columns=sheet_data[0])
 
+def puxar_passeios_sem_apoio():
+
+    nome_credencial = st.secrets["CREDENCIAL_SHEETS"]
+    credentials = service_account.Credentials.from_service_account_info(nome_credencial)
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
+    credentials = credentials.with_scopes(scope)
+    client = gspread.authorize(credentials)
+
+    spreadsheet = client.open_by_key('1GR7c8KvBtemUEAzZag742wJ4vc5Yb4IjaON_PL9mp9E')
+    
+    sheet = spreadsheet.worksheet('BD - Passeios sem Apoio')
+
+    sheet_data = sheet.get_all_values()
+
+    st.session_state.df_passeios_sem_apoio = pd.DataFrame(sheet_data[1:], columns=sheet_data[0])
+
 def verificar_servicos_regiao(df_servicos, df_regiao):
 
     lista_servicos_sem_regiao = []
