@@ -494,6 +494,10 @@ with row1[1]:
 
 st.divider()
 
+st.dataframe(st.session_state.df_tarifario_pvt_tour)
+
+st.session_state.df_tarifario_pvt_tour['Valor'].dtype
+
 # Script pra gerar mapa de pagamento
 
 if data_final and data_inicial:
