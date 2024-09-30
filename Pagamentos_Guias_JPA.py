@@ -404,7 +404,7 @@ def preencher_colunas_df(df_apoios_group):
 
 def definir_html(df_ref):
 
-    html=df_ref.to_html(index=False)
+    html=df_ref.to_html(index=False, escape=False)
 
     html = f"""
     <!DOCTYPE html>
