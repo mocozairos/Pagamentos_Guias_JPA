@@ -709,6 +709,8 @@ if data_final and data_inicial:
             
             df_apoios_group = preencher_colunas_df(df_apoios_group)
 
+            st.dataframe(df_apoios_group)
+
             df_apoios_group = gerar_pag_motoguia(df_apoios_group)
 
             df_apoios_group = criar_coluna_valor_total(df_apoios_group)
