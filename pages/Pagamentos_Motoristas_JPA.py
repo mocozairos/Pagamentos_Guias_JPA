@@ -455,7 +455,7 @@ if data_final and data_inicial:
                 df_pag_motoristas.at[index, 'Interestadual/Intermunicipal'] = 'x' 
 
 
-        df_passeios_sem_apoio = pd.read_excel('Mapa de Pagamento - Motoristas Autônomos.xlsx', engine='openpyxl', sheet_name = 'BD - Passeios sem Apoio')
+        puxar_passeios_sem_apoio()
 
         for index, value in df_pag_motoristas['Qtd. Serviços'].items():
 
@@ -467,7 +467,7 @@ if data_final and data_inicial:
 
             for index_2, value_2 in df_ref['Servico'].items():
 
-                if value_2 in df_passeios_sem_apoio['Servico'].unique().tolist():
+                if value_2 in st.session_state.df_passeios_sem_apoio['Servico'].unique().tolist():
 
                     df_pag_motoristas.at[index, 'Passeios sem Apoio'] = 'x' 
 
