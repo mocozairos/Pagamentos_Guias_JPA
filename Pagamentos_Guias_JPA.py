@@ -709,14 +709,12 @@ if data_final and data_inicial:
             
             df_apoios_group = preencher_colunas_df(df_apoios_group)
 
-            st.dataframe(df_apoios_group)
+            df_apoios_group = df_apoios_group.rename(columns={'Veiculo Apoio': 'Veiculo', 'Motorista Apoio': 'Motorista', 
+                                                              'Guia Apoio': 'Guia'})
 
             df_apoios_group = gerar_pag_motoguia(df_apoios_group)
 
             df_apoios_group = criar_coluna_valor_total(df_apoios_group)
-
-            df_apoios_group = df_apoios_group.rename(columns={'Veiculo Apoio': 'Veiculo', 'Motorista Apoio': 'Motorista', 
-                                                              'Guia Apoio': 'Guia'})
 
             df_pag_apoios = df_apoios_group[['Data da Escala', 'Modo', 'Tipo de Servico', 'Servico', 'Est. Origem', 'Veiculo', 
                                              'Motorista', 'Guia', 'Valor', 'Acréscimo Motoguia', 'Desconto por Junção', 'Valor Total']]
