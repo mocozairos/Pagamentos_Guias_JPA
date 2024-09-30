@@ -9,7 +9,7 @@ from google.oauth2 import service_account
 import gspread 
 
 def gerar_df_phoenix(vw_name):
-    # Parametros de Login AWS
+    
     config = {
     'user': 'user_automation_jpa',
     'password': 'luck_jpa_2024',
