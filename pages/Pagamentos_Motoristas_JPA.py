@@ -554,9 +554,9 @@ if data_final and data_inicial:
         df_pag_motoristas = df_pag_motoristas.rename(columns = {'Data | Horario Voo': 'Data/Horário de Término', 
                                                                 'Data | Horario Apresentacao': 'Data/Horário de Início', 'Valor': 'Valor Diária'})
 
-        df_pag_motoristas = df_pag_motoristas[['Data da Escala', 'Motorista', 'Data/Horário de Início', 'Data/Horário de Término', 'Qtd. Serviços', 
-                                            'Serviços / Veículos', 'Apenas TRF/APOIO/ENTARDECER', 'Interestadual/Intermunicipal', 
-                                            'Passeios sem Apoio', 'Acréscimo 50%', 'Valor Diária', 'Valor 50%', 'Ajuda de Custo', 'Valor Total']]
+        df_pag_motoristas = df_pag_motoristas[['Data da Escala', 'Motorista', 'Data/Horário de Início', 'Data/Horário de Término', 
+                                               'Qtd. Serviços', 'Serviços / Veículos', 'Valor Diária', 'Valor 50%', 'Ajuda de Custo', 
+                                               'Valor Total']]
         
         st.session_state.df_pag_motoristas = df_pag_motoristas
 
