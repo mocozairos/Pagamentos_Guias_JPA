@@ -265,22 +265,39 @@ def puxar_tarifarios():
         st.session_state.df_tarifario[(st.session_state.df_tarifario['Modo']=='PRIVATIVO') & 
                                       (st.session_state.df_tarifario['Tipo do Servico']=='TOUR/TRANSFER')].reset_index(drop=True)
 
+    st.session_state.df_tarifario_pvt_tour['Valor'] = pd.to_numeric(st.session_state.df_tarifario_pvt_tour['Valor'], errors='coerce')
+
     st.session_state.df_tarifario_pvt_bara_tour = \
         st.session_state.df_tarifario[(st.session_state.df_tarifario['Modo']=='PRIVATIVO BARA') & 
                                       (st.session_state.df_tarifario['Tipo do Servico']=='TOUR/TRANSFER')].reset_index(drop=True)
+
+    st.session_state.df_tarifario_pvt_bara_tour['Valor'] = \
+    pd.to_numeric(st.session_state.df_tarifario_pvt_bara_tour['Valor'], errors='coerce')
 
     st.session_state.df_tarifario_reg_tour = \
         st.session_state.df_tarifario[(st.session_state.df_tarifario['Modo']=='REGULAR') & 
                                       (st.session_state.df_tarifario['Tipo do Servico']=='TOUR/TRANSFER')].reset_index(drop=True)
 
+    st.session_state.df_tarifario_reg_tour['Valor'] = \
+    pd.to_numeric(st.session_state.df_tarifario_reg_tour['Valor'], errors='coerce')
+
     st.session_state.df_tarifario_in_out_diurno = \
         st.session_state.df_tarifario[st.session_state.df_tarifario['Modo']=='TRANSFER DIURNO'].reset_index(drop=True)
+
+    st.session_state.df_tarifario_in_out_diurno['Valor'] = \
+    pd.to_numeric(st.session_state.df_tarifario_in_out_diurno['Valor'], errors='coerce')
 
     st.session_state.df_tarifario_in_out_madrugada = \
         st.session_state.df_tarifario[st.session_state.df_tarifario['Modo']=='TRANSFER MADRUGADA'].reset_index(drop=True)
 
+    st.session_state.df_tarifario_in_out_madrugada['Valor'] = \
+    pd.to_numeric(st.session_state.df_tarifario_in_out_madrugada['Valor'], errors='coerce')
+
     st.session_state.df_tarifario_in_out_interestadual = \
         st.session_state.df_tarifario[st.session_state.df_tarifario['Modo']=='TRANSFER INTERESTADUAL'].reset_index(drop=True)
+
+    st.session_state.df_tarifario_in_out_interestadual['Valor'] = \
+    pd.to_numeric(st.session_state.df_tarifario_in_out_interestadual['Valor'], errors='coerce')
 
 def inserir_mapa_sheets(df_pag_final):
 
@@ -493,10 +510,6 @@ with row1[1]:
             puxar_tarifarios()
 
 st.divider()
-
-st.dataframe(st.session_state.df_tarifario_pvt_tour)
-
-st.session_state.df_tarifario_pvt_tour['Valor'].dtype
 
 # Script pra gerar mapa de pagamento
 
