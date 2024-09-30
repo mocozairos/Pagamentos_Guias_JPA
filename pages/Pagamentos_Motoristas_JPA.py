@@ -184,6 +184,8 @@ def inserir_mapa_sheets(df_pag_final):
 
     sheet.batch_clear(["2:100000"])
 
+    df_pag_final = df_pag_final.fillna("").astype(str)
+
     data_to_insert = df_pag_final.values.tolist()
 
     sheet.update("A2", data_to_insert)
