@@ -396,9 +396,9 @@ def preencher_colunas_df(df_apoios_group):
 
     df_apoios_group['Est. Origem']=''
 
-    df_apoios_group[['Valor', 'Valor Total']]=25
+    df_apoios_group[['Valor']]=25
 
-    df_apoios_group[['Acréscimo Motoguia', 'Desconto por Junção']]=0
+    df_apoios_group[['Acréscimo Motoguia', 'Desconto por Junção', 'Valor Total']]=0
 
     return df_apoios_group
 
@@ -708,6 +708,10 @@ if data_final and data_inicial:
                 ['Data da Escala'].first().reset_index()
             
             df_apoios_group = preencher_colunas_df(df_apoios_group)
+
+            df_apoios_group = gerar_pag_motoguia(df_apoios_group)
+
+            df_apoios_group = criar_coluna_valor_total(df_apoios_group)
 
             df_apoios_group = df_apoios_group.rename(columns={'Veiculo Apoio': 'Veiculo', 'Motorista Apoio': 'Motorista', 
                                                               'Guia Apoio': 'Guia'})
