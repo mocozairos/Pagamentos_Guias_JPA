@@ -243,6 +243,13 @@ if not 'df_escalas' in st.session_state:
     st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
                                                               (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
 
+    st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
+
+    st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
+                                    (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
+    
+    st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
+
 if not 'df_veiculo_categoria' in st.session_state:
 
     puxar_veiculo_categoria()
@@ -290,6 +297,13 @@ with row1[1]:
             st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
                                                                       (~pd.isna(st.session_state.df_escalas['Escala']))]\
                                                                         .reset_index(drop=True)
+
+            st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
+
+            st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
+                                            (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
+            
+            st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
             
     with row_1_1[1]:
 
@@ -317,8 +331,6 @@ if data_final and data_inicial:
     gerar_mapa = container_datas.button('Gerar Mapa')
 
     if gerar_mapa:
-
-        st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
         
         df_apoio_filtrado = st.session_state.df_escalas[(~pd.isna(st.session_state.df_escalas['Apoio'])) & 
                                                         (st.session_state.df_escalas['Data da Escala'] >= data_inicial) & 
