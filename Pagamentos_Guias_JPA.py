@@ -452,12 +452,6 @@ if not 'df_escalas' in st.session_state:
 
     st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
 
-    st.session_state.df_escalas = \
-        st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
-                                    (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
-    
-    st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
-
     st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
                                                                 (~pd.isna(st.session_state.df_escalas['Escala']))]\
                                                                 .reset_index(drop=True)
@@ -511,12 +505,6 @@ with row1[1]:
 
             st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
 
-            st.session_state.df_escalas = \
-                st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
-                                            (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
-            
-            st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
-
             st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
                                                                         (~pd.isna(st.session_state.df_escalas['Escala']))]\
                                                                         .reset_index(drop=True)
@@ -552,7 +540,7 @@ if data_final and data_inicial:
                                                   (st.session_state.df_escalas['Data da Escala'] <= data_final)]\
                                                     .groupby('Escala').first().reset_index()
 
-        lista_guias = [item for item in df_filtrado['Guia'].unique().tolist() if not pd.isna(item)]
+        lista_guias = [item for item in df_filtrado['Guia'].unique().tolist() if item!='']
 
         container_transferistas = st.container(border=True)
 
