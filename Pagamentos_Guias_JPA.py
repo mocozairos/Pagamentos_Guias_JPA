@@ -125,7 +125,7 @@ def ajustar_pag_giuliano_junior_neto(df):
     for index, value in df['Guia'].items():
         # Verificar se a coluna 'Estabelecimento' existe no dataframe
         if 'Estabelecimento' in df.columns:
-            if ((value == 'GIULIANO - GUIA') | (value == 'JUNIOR BUGUEIRO - GUIA')) & \
+            if ((value == 'GIULIANO - GUIA') | (value == 'JUNIOR BUGUEIRO - GUIA') | (value == 'HERBET - GUIA')) & \
             (df.at[index, 'Acréscimo Motoguia'] != 0) & \
             (df.at[index, 'Estabelecimento'] != 'BA´RA HOTEL ( - )') & \
             ((df.at[index, 'Valor Total'] < 150) | (pd.isna(df.at[index, 'Valor Total']))):
@@ -143,7 +143,7 @@ def ajustar_pag_giuliano_junior_neto(df):
                 df.at[index, 'Acréscimo Motoguia'] = 0
                 df.at[index, 'Valor Total'] = 200
         else:
-            if ((value == 'GIULIANO - GUIA') | (value == 'JUNIOR BUGUEIRO - GUIA')) & \
+            if ((value == 'GIULIANO - GUIA') | (value == 'JUNIOR BUGUEIRO - GUIA') | (value == 'HERBET - GUIA')) & \
             (df.at[index, 'Acréscimo Motoguia'] != 0) & \
             ((df.at[index, 'Valor Total'] < 150) | (pd.isna(df.at[index, 'Valor Total']))):
 
