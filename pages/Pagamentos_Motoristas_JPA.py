@@ -435,7 +435,7 @@ if data_final and data_inicial:
             def funcao(x):
                 return list(x)
             
-            df_ref_trf_group = df_ref_trf.groupby(['Modo', 'Veículo', 'Guia', 'Motorista']).agg({'Valor': 'count', 'Tipo de Servico': funcao})
+            df_ref_trf_group = df_ref_trf.groupby(['Veículo', 'Guia', 'Motorista']).agg({'Valor': 'count', 'Tipo de Servico': funcao})
             
             df_ref_trf_group = df_ref_trf_group[(df_ref_trf_group['Valor']==2) & 
                                                 (df_ref_trf_group['Tipo de Servico'].apply(lambda x: all(item in x for item in ['IN', 'OUT'])))].reset_index(drop=True)
