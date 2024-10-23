@@ -452,8 +452,22 @@ if not 'df_escalas' in st.session_state:
 
     st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
 
+    st.session_state.df_escalas = \
+        st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
+                                    (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
+    
+    st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
+
     st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
-                                                              (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
+                                                                (~pd.isna(st.session_state.df_escalas['Escala']))]\
+                                                                .reset_index(drop=True)
+    
+    st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
+
+    st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
+                                    (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
+    
+    st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
 
 # Definindo tarifários definidos na planilha
 
@@ -500,6 +514,19 @@ with row1[1]:
             st.session_state.df_escalas = \
                 st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
                                             (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
+            
+            st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
+
+            st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
+                                                                        (~pd.isna(st.session_state.df_escalas['Escala']))]\
+                                                                        .reset_index(drop=True)
+            
+            st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
+
+            st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
+                                            (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
+            
+            st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
 
     # Botão 'Atualizar Tarifários'
 
