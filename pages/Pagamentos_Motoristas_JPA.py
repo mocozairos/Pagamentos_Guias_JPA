@@ -250,14 +250,6 @@ if not 'df_escalas' in st.session_state:
     
     st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
 
-if not 'df_veiculo_categoria' in st.session_state:
-
-    puxar_veiculo_categoria()
-
-if not 'df_regiao' in st.session_state:
-
-    puxar_regiao()
-
 st.set_page_config(layout='wide')
 
 # Título da página
@@ -304,22 +296,6 @@ with row1[1]:
                                             (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
             
             st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
-            
-    with row_1_1[1]:
-
-        atualizar_veiculos_categorias = st.button('Atualizar Categorias Veículos')
-
-        if atualizar_veiculos_categorias:
-
-            puxar_veiculo_categoria()
-
-    with row_1_1[2]:
-
-        atualizar_regioes = st.button('Atualizar Regiões')
-
-        if atualizar_regioes:
-
-            puxar_regiao()
 
 
 st.divider()
@@ -327,6 +303,10 @@ st.divider()
 # Script pra gerar mapa de pagamento
 
 if data_final and data_inicial:
+
+    puxar_veiculo_categoria()
+
+    puxar_regiao()
 
     gerar_mapa = container_datas.button('Gerar Mapa')
 
@@ -580,6 +560,10 @@ if data_final and data_inicial:
 
 if 'df_pag_motoristas' in st.session_state:
 
+    df_tabela_st = st.session_state.df_pag_motoristas.reset_index(drop=True)
+
+    df_tabela_st['Serviços / Veículos'] = df_tabela_st['Serviços / Veículos'].astype(str).apply(lambda x: x.replace('<br><br>', ' + '))
+
     st.header('Gerar Mapas')
 
     row2 = st.columns(2)
@@ -596,11 +580,13 @@ if 'df_pag_motoristas' in st.session_state:
 
         df_pag_motoristas_ref = st.session_state.df_pag_motoristas[st.session_state.df_pag_motoristas['Motorista']==motorista].reset_index(drop=True)
 
-        st.dataframe(df_pag_motoristas_ref, hide_index=True)
+        df_tabela_st_2 = df_tabela_st[df_tabela_st['Motorista']==motorista].reset_index(drop=True)
+
+        st.dataframe(df_tabela_st_2, hide_index=True)
 
         with row2_1[0]:
 
-            total_a_pagar = df_pag_motoristas_ref['Valor Total'].sum()
+            total_a_pagar = df_tabela_st_2['Valor Total'].sum()
 
             st.subheader(f'Valor Total: R${int(total_a_pagar)}')
 
@@ -615,8 +601,6 @@ if 'df_pag_motoristas' in st.session_state:
         for item in ['Valor Diária', 'Valor 50%', 'Ajuda de Custo', 'Valor Total']:
 
             df_pag_motoristas_ref[item] = df_pag_motoristas_ref[item].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
-
-        
 
         html=definir_html(df_pag_motoristas_ref)
 
@@ -636,7 +620,3 @@ if 'df_pag_motoristas' in st.session_state:
                 file_name=nome_html,
                 mime="text/html"
             )
-
-
-
-
