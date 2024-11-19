@@ -54,7 +54,7 @@ def verificar_acrescimo(row):
     # Verifica se apr_time e voo_time não são NaT
     if pd.notna(apr_time) and pd.notna(voo_time):
         # Verifica se 'Data/Horário de Apr.' é antes das 17:00:00 e 'Data/Horário de Voo' é no dia seguinte
-        if (apr_time.time() <= pd.Timestamp('18:00:00').time()) & \
+        if ((apr_time.time() <= pd.Timestamp('18:00:00').time()) & (apr_time.time() >= pd.Timestamp('04:00:00').time())) & \
         ((voo_time.date() == apr_time.date() + pd.Timedelta(days=1)) | (voo_time.time() >= pd.Timestamp('23:59:00').time())):
             row['Acréscimo 50%'] = 'x'
     return row
@@ -560,7 +560,7 @@ if data_final and data_inicial:
                     
             df_pag_motoristas.at[index, 'Serviços / Veículos'] = str_servicos
 
-        df_pag_motoristas.loc[df_pag_motoristas['Serviços / Veículos'].str.contains('ALUGUEL FORA DE JPA', na=False), 'Ajuda de Custo'] = 15
+        df_pag_motoristas.loc[df_pag_motoristas['Serviços / Veículos'].str.contains('ALUGUEL FORA DE JPA', na=False), 'Ajuda de Custo'] = 25
 
         df_pag_motoristas['Valor Total'] = df_pag_motoristas['Valor'] + df_pag_motoristas['Valor 50%'] + df_pag_motoristas['Ajuda de Custo']
 
