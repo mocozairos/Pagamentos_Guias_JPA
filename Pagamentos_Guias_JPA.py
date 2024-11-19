@@ -465,10 +465,6 @@ if not 'df_escalas' in st.session_state:
 
 # Definindo tarifários definidos na planilha
 
-if not 'df_tarifario' in st.session_state:
-
-    puxar_tarifarios()
-
 # Título da página
 
 st.title('Mapa de Pagamento - Guias')
@@ -516,16 +512,6 @@ with row1[1]:
             
             st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
 
-    # Botão 'Atualizar Tarifários'
-
-    with row_1_1[1]:
-
-        atualizar_tarifarios = st.button('Atualizar Tarifários')
-
-        if atualizar_tarifarios:
-
-            puxar_tarifarios()
-
 st.divider()
 
 # Script pra gerar mapa de pagamento
@@ -553,6 +539,8 @@ if data_final and data_inicial:
             gerar_mapa = container_datas.button('Gerar Mapa de Pagamentos')
 
         if gerar_mapa:
+
+            puxar_tarifarios()
 
             # Gerando dataframes base para os mapas de pagamento
 
