@@ -442,10 +442,10 @@ if data_final and data_inicial:
                     
                     df_pag_motoristas.at[index, 'Apenas TRF/APOIO/ENTARDECER'] = 'x'
 
-                elif (len(lista_servico)==1 and lista_servico[0]=='ENTARDECER NA PRAIA DO JACARÉ') or \
+                elif (len(lista_servico)==1 and lista_servico[0]=='ENTARDECER NA PRAIA DO JACARÉ ') or \
                     (len(lista_servico)==1 and lista_servico[0]=='ALUGUEL DENTRO DE JPA') or \
                         (len(lista_servico)==2 and 'ALUGUEL DENTRO DE JPA' in lista_servico and 
-                         'ENTARDECER NA PRAIA DO JACARÉ' in lista_servico):
+                         'ENTARDECER NA PRAIA DO JACARÉ ' in lista_servico):
                     
                     df_pag_motoristas.at[index, 'Apenas TRF/APOIO/ENTARDECER'] = 'x'
                     
