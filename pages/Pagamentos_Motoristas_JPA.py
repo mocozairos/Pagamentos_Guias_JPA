@@ -348,6 +348,14 @@ if data_final and data_inicial:
 
         df_filtrado['Horario Voo'] = pd.to_datetime(df_filtrado['Horario Voo'], format='%H:%M:%S').dt.time
 
+        if len(df_filtrado[df_filtrado['Data Voo']==''])>0:
+
+            lista_reservas = ', '.join(df_filtrado[df_filtrado['Data Voo']=='']['Reserva'].unique().tolist())
+
+            st.error(f'As reservas {lista_reservas} estão sem voo no IN ou OUT')
+
+            st.stop()
+
         df_filtrado['Data | Horario Voo'] = pd.to_datetime(df_filtrado['Data Voo'].astype(str) + ' ' + df_filtrado['Horario Voo'].astype(str))
 
         for index in range(len(df_filtrado)):
