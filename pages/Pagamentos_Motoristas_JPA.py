@@ -348,6 +348,10 @@ if data_final and data_inicial:
 
         df_filtrado['Horario Voo'] = pd.to_datetime(df_filtrado['Horario Voo'], format='%H:%M:%S').dt.time
 
+        df_filtrado.loc[df_filtrado['Data Voo']=='', 'Data Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.date
+
+        df_filtrado.loc[pd.isna(df_filtrado['Horario Voo']), 'Horario Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.time
+
         if len(df_filtrado[df_filtrado['Data Voo']==''])>0:
 
             lista_reservas = ', '.join(df_filtrado[df_filtrado['Data Voo']=='']['Reserva'].unique().tolist())
