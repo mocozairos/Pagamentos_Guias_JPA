@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from babel.numbers import format_currency
 from google.oauth2 import service_account
 import gspread 
+import requests
 
 def gerar_df_phoenix(vw_name):
     
@@ -444,24 +445,82 @@ def criar_output_html(nome_html, html, guia, soma_servicos):
 
         file.write(f'<br><br><p style="font-size:40px;">O valor total dos serviços é {soma_servicos}</p>')
 
+def puxar_aba_simples(id_gsheet, nome_aba, nome_df):
+
+    nome_credencial = st.secrets["CREDENCIAL_SHEETS"]
+    credentials = service_account.Credentials.from_service_account_info(nome_credencial)
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
+    credentials = credentials.with_scopes(scope)
+    client = gspread.authorize(credentials)
+
+    spreadsheet = client.open_by_key(id_gsheet)
+    
+    sheet = spreadsheet.worksheet(nome_aba)
+
+    sheet_data = sheet.get_all_values()
+
+    st.session_state[nome_df] = pd.DataFrame(sheet_data[1:], columns=sheet_data[0])
+
+def verificar_guia_sem_telefone(id_gsheet, guia, lista_guias_com_telefone):
+
+    if not guia in lista_guias_com_telefone:
+
+        lista_guias = []
+
+        lista_guias.append(guia)
+
+        df_itens_faltantes = pd.DataFrame(lista_guias, columns=['Guias'])
+
+        st.dataframe(df_itens_faltantes, hide_index=True)
+
+        nome_credencial = st.secrets["CREDENCIAL_SHEETS"]
+        credentials = service_account.Credentials.from_service_account_info(nome_credencial)
+        scope = ['https://www.googleapis.com/auth/spreadsheets']
+        credentials = credentials.with_scopes(scope)
+        client = gspread.authorize(credentials)
+        
+        spreadsheet = client.open_by_key(id_gsheet)
+
+        sheet = spreadsheet.worksheet('Telefones Guias')
+        sheet_data = sheet.get_all_values()
+        last_filled_row = len(sheet_data)
+        data = df_itens_faltantes.values.tolist()
+        start_row = last_filled_row + 1
+        start_cell = f"A{start_row}"
+        
+        sheet.update(start_cell, data)
+
+        st.error(f'O guia {guia} não tem número de telefone cadastrado na planilha. Ele foi inserido no final da lista de guias. Por favor, cadastre o telefone dele e tente novamente')
+
+        st.stop()
+
+    else:
+
+        telefone_guia = st.session_state.df_telefones.loc[st.session_state.df_telefones['Guias']==guia, 'Telefone'].values[0]
+
+    return telefone_guia
+
+def puxar_dados_phoenix():
+
+    st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
+
+    st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & (~pd.isna(st.session_state.df_escalas['Escala']))].reset_index(drop=True)
+    
+    st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
+
+    st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
+    
+    st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
+
 st.set_page_config(layout='wide')
 
 # Puxando dados do Phoenix da 'vw_payment_guide'
 
 if not 'df_escalas' in st.session_state:
 
-    st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
+    with st.spinner('Puxando dados do Phoenix...'):
 
-    st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
-                                                                (~pd.isna(st.session_state.df_escalas['Escala']))]\
-                                                                .reset_index(drop=True)
-    
-    st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
-
-    st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
-                                    (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
-    
-    st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
+        puxar_dados_phoenix()
 
 # Definindo tarifários definidos na planilha
 
@@ -499,18 +558,7 @@ with row1[1]:
 
         if atualizar_phoenix:
 
-            st.session_state.df_escalas = gerar_df_phoenix('vw_payment_guide')
-
-            st.session_state.df_escalas = st.session_state.df_escalas[(st.session_state.df_escalas['Status do Servico']!='CANCELADO') & 
-                                                                        (~pd.isna(st.session_state.df_escalas['Escala']))]\
-                                                                        .reset_index(drop=True)
-            
-            st.session_state.df_escalas['Data | Horario Apresentacao'] = pd.to_datetime(st.session_state.df_escalas['Data | Horario Apresentacao'], errors='coerce')
-
-            st.session_state.df_escalas.loc[(st.session_state.df_escalas['Modo']=='PRIVATIVO POR VEICULO') | 
-                                            (st.session_state.df_escalas['Modo']=='PRIVATIVO POR PESSOA'), 'Modo'] = 'PRIVATIVO'
-            
-            st.session_state.df_escalas['Guia'] = st.session_state.df_escalas['Guia'].fillna('')
+            puxar_dados_phoenix()
 
 st.divider()
 
@@ -741,18 +789,28 @@ if 'df_pag_final' in st.session_state:
 
     with row2[0]:
 
-        lista_guias = st.session_state.df_pag_final['Guia'].dropna().unique().tolist()
+        lista_guias = st.session_state.df_pag_final[~(st.session_state.df_pag_final['Guia'].isin(['SEM GUIA', 'NENHUM GUIA', ''])) & 
+                                                    (~st.session_state.df_pag_final['Guia'].str.contains('BUGUEIRO')) & (~st.session_state.df_pag_final['Guia'].str.contains('PDV')) & 
+                                                    (~st.session_state.df_pag_final['Guia'].str.contains('BASE AEROPORTO')) & 
+                                                    (~st.session_state.df_pag_final['Guia'].str.contains('VENDAS ONLINE'))]['Guia'].dropna().unique().tolist()
 
         guia = st.selectbox('Guia', sorted(lista_guias), index=None)
 
     if guia:
 
-        row2_1 = st.columns(2)
+        row2_1 = st.columns(4)
 
-        df_pag_guia = st.session_state.df_pag_final[st.session_state.df_pag_final['Guia']==guia]\
-            .sort_values(by=['Data da Escala', 'Veículo', 'Motorista']).reset_index(drop=True)
+        df_pag_guia = st.session_state.df_pag_final[st.session_state.df_pag_final['Guia']==guia].sort_values(by=['Data da Escala', 'Veículo', 'Motorista']).reset_index(drop=True)
 
-        st.dataframe(df_pag_guia, hide_index=True)
+        df_data_correta = df_pag_guia.reset_index(drop=True)
+
+        df_data_correta['Data da Escala'] = pd.to_datetime(df_data_correta['Data da Escala'])
+
+        df_data_correta['Data da Escala'] = df_data_correta['Data da Escala'].dt.strftime('%d/%m/%Y')
+
+        container_dataframe = st.container()
+
+        container_dataframe.dataframe(df_data_correta, hide_index=True, use_container_width = True)
 
         with row2_1[0]:
 
@@ -791,16 +849,95 @@ if 'df_pag_final' in st.session_state:
                 mime="text/html"
             )
 
+        st.session_state.html_content = html_content
 
+    else:
+
+        row2_1 = st.columns(4)
+
+        with row2_1[0]:
+
+            enviar_informes = st.button(f'Enviar Informes Gerais')
+
+            if enviar_informes:
+
+                puxar_aba_simples('1GR7c8KvBtemUEAzZag742wJ4vc5Yb4IjaON_PL9mp9E', 'Telefones Guias', 'df_telefones')
+
+                lista_htmls = []
+
+                lista_telefones = []
+
+                for guia_ref in lista_guias:
+
+                    telefone_guia = verificar_guia_sem_telefone('1GR7c8KvBtemUEAzZag742wJ4vc5Yb4IjaON_PL9mp9E', guia_ref, st.session_state.df_telefones['Guias'].unique().tolist())
+
+                    df_pag_guia = st.session_state.df_pag_final[st.session_state.df_pag_final['Guia']==guia_ref].sort_values(by=['Data da Escala', 'Veículo', 'Motorista']).reset_index(drop=True)
+
+                    df_pag_guia['Data da Escala'] = pd.to_datetime(df_pag_guia['Data da Escala'])
+
+                    df_pag_guia['Data da Escala'] = df_pag_guia['Data da Escala'].dt.strftime('%d/%m/%Y')
+
+                    soma_servicos = df_pag_guia['Valor Total'].sum()
+
+                    soma_servicos = format_currency(soma_servicos, 'BRL', locale='pt_BR')
+
+                    for item in ['Valor', 'Acréscimo Motoguia', 'Desconto por Junção', 'Valor Total']:
+
+                        df_pag_guia[item] = df_pag_guia[item].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
+
+                    html = definir_html(df_pag_guia)
+
+                    nome_html = f'{guia_ref}.html'
+
+                    criar_output_html(nome_html, html, guia_ref, soma_servicos)
+
+                    with open(nome_html, "r", encoding="utf-8") as file:
+
+                        html_content_guia_ref = file.read()
+
+                    lista_htmls.append([html_content_guia_ref, telefone_guia])
+
+                webhook_thiago = "https://conexao.multiatend.com.br/webhook/pagamentoluckjoaopessoa"
+
+                payload = {"informe_html": lista_htmls}
+                
+                response = requests.post(webhook_thiago, json=payload)
+                    
+                if response.status_code == 200:
+                    
+                    st.success(f"Mapas de Pagamentos enviados com sucesso!")
+                    
+                else:
+                    
+                    st.error(f"Erro. Favor contactar o suporte")
+
+                    st.error(f"{response}")
+
+if 'html_content' in st.session_state and guia:
+
+    with row2_1[2]:
+
+        enviar_informes = st.button(f'Enviar Informes | {guia}')
+
+    if enviar_informes:
+
+        puxar_aba_simples('1GR7c8KvBtemUEAzZag742wJ4vc5Yb4IjaON_PL9mp9E', 'Telefones Guias', 'df_telefones')
+
+        telefone_guia = verificar_guia_sem_telefone('1GR7c8KvBtemUEAzZag742wJ4vc5Yb4IjaON_PL9mp9E', guia, st.session_state.df_telefones['Guias'].unique().tolist())
+
+        webhook_thiago = "https://conexao.multiatend.com.br/webhook/pagamentoluckjoaopessoa"
         
-
-
-
+        payload = {"informe_html": st.session_state.html_content, 
+                    "telefone": telefone_guia}
         
+        response = requests.post(webhook_thiago, json=payload)
+            
+        if response.status_code == 200:
+            
+            st.success(f"Mapas de Pagamento enviados com sucesso!")
+            
+        else:
+            
+            st.error(f"Erro. Favor contactar o suporte")
 
-
-
-
-
-
-
+            st.error(f"{response}")
