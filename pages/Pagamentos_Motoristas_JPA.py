@@ -648,6 +648,8 @@ if 'df_pag_motoristas' in st.session_state:
 
         df_tabela_st_2['Data/Horário de Término'] = pd.to_datetime(df_tabela_st_2['Data/Horário de Término']).dt.strftime('%d/%m/%Y %H:%M:%S')
 
+        df_tabela_st_2[['Valor Diária', 'Valor 50%', 'Ajuda de Custo', 'Valor Total']] = df_tabela_st_2[['Valor Diária', 'Valor 50%', 'Ajuda de Custo', 'Valor Total']].fillna(0)
+
         st.dataframe(df_tabela_st_2, hide_index=True)
 
         with row2_1[0]:
@@ -667,6 +669,8 @@ if 'df_pag_motoristas' in st.session_state:
         soma_servicos = format_currency(soma_servicos, 'BRL', locale='pt_BR')
 
         for item in ['Valor Diária', 'Valor 50%', 'Ajuda de Custo', 'Valor Total']:
+
+            df_pag_motoristas_ref[item] = df_pag_motoristas_ref[item].fillna(0)
 
             df_pag_motoristas_ref[item] = df_pag_motoristas_ref[item].apply(lambda x: format_currency(x, 'BRL', locale='pt_BR'))
 
