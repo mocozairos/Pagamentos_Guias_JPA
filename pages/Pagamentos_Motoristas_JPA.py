@@ -398,17 +398,15 @@ if data_final and data_inicial and gerar_mapa:
 
     df_filtrado['Horario Voo'] = pd.to_datetime(df_filtrado['Horario Voo'], format='%H:%M:%S').dt.time
 
-    df_filtrado.loc[df_filtrado['Data Voo']=='', 'Data Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.date
-
-    df_filtrado.loc[pd.isna(df_filtrado['Horario Voo']), 'Horario Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.time
-
     if len(df_filtrado[df_filtrado['Data Voo']==''])>0:
 
         lista_reservas = ', '.join(df_filtrado[df_filtrado['Data Voo']=='']['Reserva'].unique().tolist())
 
-        st.error(f'As reservas {lista_reservas} estão sem voo no IN ou OUT')
+        df_filtrado.loc[df_filtrado['Data Voo']=='', 'Data Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.date
 
-        st.stop()
+        df_filtrado.loc[pd.isna(df_filtrado['Horario Voo']), 'Horario Voo'] = df_filtrado['Data | Horario Apresentacao'].dt.time
+
+        st.error(f'As reservas {lista_reservas} estão sem voo no IN ou OUT. O robô vai gerar os pagamentos, criando um horário fictício para o voo')
 
     df_filtrado['Data | Horario Voo'] = pd.to_datetime(df_filtrado['Data Voo'].astype(str) + ' ' + df_filtrado['Horario Voo'].astype(str))
 
@@ -420,7 +418,10 @@ if data_final and data_inicial and gerar_mapa:
 
             hora_voo = df_filtrado.at[index, 'Horario Voo']
 
-            if hora_voo >= pd.to_datetime('00:00:00').time() and hora_voo <= pd.to_datetime('07:00:00').time():
+            hora_apresentacao = df_filtrado.at[index, 'Data | Horario Apresentacao'].time()
+
+            if (hora_voo >= pd.to_datetime('00:00:00').time() and hora_voo <= pd.to_datetime('07:00:00').time()) or \
+                (hora_apresentacao >= pd.to_datetime('00:00:00').time() and hora_apresentacao <= pd.to_datetime('04:00:00').time()):
 
                 df_filtrado.at[index, 'Data da Escala']-=pd.Timedelta(days=1)
 
