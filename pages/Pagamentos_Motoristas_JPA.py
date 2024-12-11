@@ -386,6 +386,8 @@ if data_final and data_inicial and gerar_mapa:
 
     df_pag_apoios = pd.merge(df_apoios_group, st.session_state.df_veiculo_categoria, on='Veículo', how='left')
 
+    lista_veiculos_sem_diaria = df_pag_apoios[pd.isna(df_pag_apoios['Valor'])]['Veículo'].unique().tolist()
+
     mask = df_filtrado['Tipo de Servico'].isin(['TOUR', 'TRANSFER'])
 
     df_filtrado.loc[mask, 'Data Voo'] = df_filtrado.loc[mask, 'Data | Horario Apresentacao'].dt.date
@@ -395,6 +397,16 @@ if data_final and data_inicial and gerar_mapa:
     df_filtrado = df_filtrado.rename(columns={'Veiculo': 'Veículo'})
 
     df_filtrado = pd.merge(df_filtrado, st.session_state.df_veiculo_categoria, on='Veículo', how='left')
+
+    lista_veiculos_sem_diaria.extend(df_filtrado[pd.isna(df_filtrado['Valor'])]['Veículo'].unique().tolist())
+
+    if len(lista_veiculos_sem_diaria)>0:
+
+        nome_veiculos_sem_diaria = ', '.join(lista_veiculos_sem_diaria)
+
+        st.error(f'Os veículos {nome_veiculos_sem_diaria} não tem valor de diária cadastrada. Cadastre e tente novamente, por favor')
+
+        st.stop()
 
     df_filtrado['Horario Voo'] = pd.to_datetime(df_filtrado['Horario Voo'], format='%H:%M:%S').dt.time
 
